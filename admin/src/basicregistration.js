@@ -71,9 +71,9 @@ function BasicRegistration() {
 
     // Download CSV
     const downloadCSV = () => {
-        const headers = ['Serial No.', 'Name', 'Email', 'Mobile No.', 'Order Id', 'Payment Id', 'Amount', 'Paid'];
+        const headers = ['Serial No.', 'Name', 'Email', 'Mobile No.','College', 'Order Id', 'Payment Id', 'Amount', 'Paid'];
         const rows = filteredRegistrations.map((reg, index) => [
-            index + 1, reg.name, reg.email, reg.mobile, reg.order_Id, reg.payment_Id, reg.amount, reg.Paid ? 'Paid' : 'Not Paid'
+            index + 1, reg.name, reg.email, reg.mobile, reg.college, reg.order_Id, reg.payment_Id, reg.amount, reg.Paid ? 'Paid' : 'Not Paid'
         ]);
 
         let csvContent = 'data:text/csv;charset=utf-8,';
@@ -156,6 +156,7 @@ function BasicRegistration() {
                             <th className="px-6 py-3 text-left text-sm font-semibold">Name</th>
                             <th className="px-6 py-3 text-left text-sm font-semibold">Email</th>
                             <th className="px-6 py-3 text-left text-sm font-semibold">Mobile No.</th>
+                            <th className="px-6 py-3 text-left text-sm font-semibold">College</th>
                             <th className="px-6 py-3 text-left text-sm font-semibold">Order Id</th>
                             <th className="px-6 py-3 text-left text-sm font-semibold">Payment Id</th>
                             <th className="px-6 py-3 text-left text-sm font-semibold">Amount</th>
@@ -172,6 +173,7 @@ function BasicRegistration() {
                                 <td className="px-6 py-4">{reg.name}</td>
                                 <td className="px-6 py-4">{reg.email}</td>
                                 <td className="px-6 py-4">{reg.mobile}</td>
+                                <td className="px-6 py-4">{reg.college}</td>
                                 <td className="px-6 py-4">{reg.order_Id}</td>
                                 <td className="px-6 py-4">{reg.payment_Id}</td>
                                 <td className="px-6 py-4 text-green-600 font-semibold">{reg.amount}</td>

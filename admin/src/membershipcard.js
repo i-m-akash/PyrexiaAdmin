@@ -11,57 +11,48 @@ function MembershipCard() {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Fetching Registration Data on Component Mount
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const registrationData = await axios.get(`${BASE_URL}/admin/membershipcard`);
                 setRegistrations(registrationData.data);
-                setFilteredRegistrations(registrationData.data); // Set initial filtered data
+                setFilteredRegistrations(registrationData.data);
             } catch (error) {
                 setError('Error fetching data. Please try again.');
-                console.error('Error fetching data:', error);
             } finally {
-                setLoading(false); // Stop loading once data is fetched
+                setLoading(false);
             }
         };
         fetchData();
     }, []);
 
-    // Handle filter change for Paid/Not Paid
     const handleFilterChange = (e) => {
         setFilter(e.target.value);
         applyFilters(e.target.value, searchPaymentId, searchMobile);
     };
 
-    // Handle search by paymentId
     const handleSearchPaymentIdChange = (e) => {
         setSearchPaymentId(e.target.value);
         applyFilters(filter, e.target.value, searchMobile);
     };
 
-    // Handle search by mobile number
     const handleSearchMobileChange = (e) => {
         setSearchMobile(e.target.value);
         applyFilters(filter, searchPaymentId, e.target.value);
     };
 
-    // Apply filters for "Paid", "Payment ID", and "Mobile No."
     const applyFilters = (selectedFilter, paymentId, mobile) => {
         let filtered = registrations;
 
-        // Filter by Paid/Not Paid
         if (selectedFilter !== 'all') {
             const isPaid = selectedFilter === 'paid';
             filtered = filtered.filter(reg => reg.Paid === isPaid);
         }
 
-        // Filter by paymentId
         if (paymentId) {
             filtered = filtered.filter(reg => reg.payment_Id && reg.payment_Id.includes(paymentId));
         }
 
-        // Filter by mobile number
         if (mobile) {
             filtered = filtered.filter(reg => reg.mobile && reg.mobile.includes(mobile));
         }
@@ -69,11 +60,27 @@ function MembershipCard() {
         setFilteredRegistrations(filtered);
     };
 
-    // Download CSV
+    // Function to handle checkbox change
+    const handleCheckboxChange = async (id, givenStatus) => {
+        try {
+            await axios.post(`${BASE_URL}/membershipcardTickets`, {
+                id // Assuming this is the field in your backend
+            });
+            // Update the local state after successful API update
+            const updatedRegistrations = registrations.map(reg =>
+                reg._id === id ? { ...reg, ticketGiven: givenStatus } : reg
+            );
+            setRegistrations(updatedRegistrations);
+            setFilteredRegistrations(updatedRegistrations);
+        } catch (error) {
+            console.error("Error updating ticket status:", error);
+        }
+    };
+
     const downloadCSV = () => {
-        const headers = ['Serial No.', 'Name', 'Email', 'Mobile No.','College', 'Order Id', 'Payment Id', 'Amount', 'Paid'];
+        const headers = ['Serial No.', 'Name', 'Email', 'Mobile No.', 'College', 'Order Id', 'Payment Id', 'Amount', 'Paid', 'Ticket Given'];
         const rows = filteredRegistrations.map((reg, index) => [
-            index + 1, reg.name, reg.email, reg.mobile,reg.college, reg.order_Id, reg.payment_Id, reg.amount, reg.Paid ? 'Paid' : 'Not Paid'
+            index + 1, reg.name, reg.email, reg.mobile, `"${reg.college}"`, reg.order_Id, reg.payment_Id, reg.amount, reg.Paid ? 'Paid' : 'Not Paid', reg.ticketGiven ? 'Yes' : 'No'
         ]);
 
         let csvContent = 'data:text/csv;charset=utf-8,';
@@ -91,12 +98,10 @@ function MembershipCard() {
         link.click();
     };
 
-    // Loading state
     if (loading) {
         return <div className="flex justify-center items-center h-screen"><div>Loading data...</div></div>;
     }
 
-    // Error state
     if (error) {
         return <div className="text-red-500 text-center">{error}</div>;
     }
@@ -105,9 +110,7 @@ function MembershipCard() {
         <div className="container mx-auto p-6 bg-gradient-to-l from-sky-400 to-white min-h-screen">
             <h1 className="text-4xl font-extrabold text-center text-[#001f3f] mb-8">Membership Card Registration</h1>
 
-            {/* Filter & Search Section */}
             <div className="flex justify-center mb-4 space-x-4">
-                {/* Filter Dropdown */}
                 <select
                     value={filter}
                     onChange={handleFilterChange}
@@ -118,7 +121,6 @@ function MembershipCard() {
                     <option value="not_paid">Not Paid</option>
                 </select>
 
-                {/* Search by Payment ID */}
                 <input
                     type="text"
                     value={searchPaymentId}
@@ -127,7 +129,6 @@ function MembershipCard() {
                     className="border border-gray-300 p-2 rounded-lg shadow-lg"
                 />
 
-                {/* Search by Mobile Number */}
                 <input
                     type="text"
                     value={searchMobile}
@@ -137,7 +138,6 @@ function MembershipCard() {
                 />
             </div>
 
-            {/* Download CSV Button */}
             <div className="flex justify-center mb-4">
                 <button 
                     onClick={downloadCSV} 
@@ -147,7 +147,6 @@ function MembershipCard() {
                 </button>
             </div>
 
-            {/* Registrations Table */}
             <div className="overflow-x-auto">
                 <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
                     <thead className="bg-[#001f3f] text-white">
@@ -161,6 +160,7 @@ function MembershipCard() {
                             <th className="px-6 py-3 text-left text-sm font-semibold">Payment Id</th>
                             <th className="px-6 py-3 text-left text-sm font-semibold">Amount</th>
                             <th className="px-6 py-3 text-left text-sm font-semibold">Paid</th>
+                            <th className="px-6 py-3 text-left text-sm font-semibold">Ticket Given</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -178,6 +178,14 @@ function MembershipCard() {
                                 <td className="px-6 py-4">{reg.payment_Id}</td>
                                 <td className="px-6 py-4 text-green-600 font-semibold">{reg.amount}</td>
                                 <td className="px-6 py-4">{reg.Paid ? "Paid" : "Not Paid"}</td>
+                                <td className="px-6 py-4">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={reg.ticketGiven} 
+                                        onChange={(e) => handleCheckboxChange(reg._id, e.target.checked)} 
+                                        disabled={reg.ticketGiven}
+                                    />
+                                </td>
                             </tr>
                         ))}
                     </tbody>

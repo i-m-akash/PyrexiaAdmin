@@ -68,12 +68,27 @@ function BasicRegistration() {
 
         setFilteredRegistrations(filtered);
     };
+    const handleCheckboxChange = async (id, givenStatus) => {
+        try {
+            await axios.post(`${BASE_URL}/basicTickets`, {
+                id // Assuming this is the field in your backend
+            });
+            // Update the local state after successful API update
+            const updatedRegistrations = registrations.map(reg =>
+                reg._id === id ? { ...reg, ticketGiven: givenStatus } : reg
+            );
+            setRegistrations(updatedRegistrations);
+            setFilteredRegistrations(updatedRegistrations);
+        } catch (error) {
+            console.error("Error updating ticket status:", error);
+        }
+    };
 
     // Download CSV
     const downloadCSV = () => {
-        const headers = ['Serial No.', 'Name', 'Email', 'Mobile No.','College', 'Order Id', 'Payment Id', 'Amount', 'Paid'];
+        const headers = ['Serial No.', 'Name', 'Email', 'Mobile No.','College', 'Order Id', 'Payment Id', 'Amount', 'Paid' , 'Ticket Given'];
         const rows = filteredRegistrations.map((reg, index) => [
-            index + 1, reg.name, reg.email, reg.mobile, reg.college, reg.order_Id, reg.payment_Id, reg.amount, reg.Paid ? 'Paid' : 'Not Paid'
+            index + 1, reg.name, reg.email, reg.mobile,   `"${reg.college}"`, reg.order_Id, reg.payment_Id, reg.amount, reg.Paid ? 'Paid' : 'Not Paid', reg.ticketGiven ? 'Yes' : 'No'
         ]);
 
         let csvContent = 'data:text/csv;charset=utf-8,';
@@ -161,6 +176,7 @@ function BasicRegistration() {
                             <th className="px-6 py-3 text-left text-sm font-semibold">Payment Id</th>
                             <th className="px-6 py-3 text-left text-sm font-semibold">Amount</th>
                             <th className="px-6 py-3 text-left text-sm font-semibold">Paid</th>
+                            <th className="px-6 py-3 text-left text-sm font-semibold">Ticket Given</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -178,6 +194,14 @@ function BasicRegistration() {
                                 <td className="px-6 py-4">{reg.payment_Id}</td>
                                 <td className="px-6 py-4 text-green-600 font-semibold">{reg.amount}</td>
                                 <td className="px-6 py-4">{reg.Paid ? "Paid" : "Not Paid"}</td>
+                                <td className="px-6 py-4">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={reg.ticketGiven} 
+                                        onChange={(e) => handleCheckboxChange(reg._id, e.target.checked)} 
+                                        disabled={reg.ticketGiven}
+                                    />
+                                </td>
                             </tr>
                         ))}
                     </tbody>

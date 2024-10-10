@@ -15,6 +15,7 @@ import UpdateEvent from './updateEvent';
 import AddMemberPayment from './addmemberpaymentdetails';
 import AddBasicPayment from './addBasicpayment';
 import AddEventPayment from './addEventPayment';
+import PaymentChecker from './paymentChecker';
 function App() {
     // const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -45,6 +46,7 @@ function App() {
                 <Route path="/add-member-payment" element={<AddMemberPayment />} />
                 <Route path="/add-basic-payment" element={<AddBasicPayment />} />
                 <Route path="/add-events-payment" element={<AddEventPayment />} />
+                <Route path="/check-payment" element={<PaymentChecker />} />
             </Routes>
         </Router>
     );
